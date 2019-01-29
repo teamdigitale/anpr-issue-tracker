@@ -1,0 +1,6 @@
+auth_names.txt
+credentials.txt
+venv
+*.csv
+*.swp
+*.pyc
