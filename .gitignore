@@ -1,10 +1,10 @@
-*.st
-venv
+*.s
+.venv
 *.csv
 *.swp
 *.pyc
 secrets
 private
+tmp
+public
 
-secrets
-private

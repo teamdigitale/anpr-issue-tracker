@@ -1,34 +1,88 @@
-# Utils.py
-import datetime
-from datetime import timedelta
-from dateutil import parser
+import csv
+import time
+import subprocess
+from pdfkit import from_file
+from pathlib import Path
+import re
+
+from datetime import timedelta, timezone, datetime
+from os import stat, path
+from shutil import copyfile
+from pystache import Renderer
+
+# Globals
+SECRETS_DIR = 'secrets/'
+TEMPLATE_DIR = '../template/'
+PUBLIC_DIR = '../public/'
+PRIVATE_DIR = '../private/'
+TMP_DIR = '../tmp/'
+REPORT_DIR = '../report/'
+INDEX_FILE = 'index.html'
 
 
-def shrink(t, start, end):
-    "Return `t` clamped to the range [`start`, `end`]."
-    return max(start, min(end, t))
+def check_db():
+    """ Check DB and return the last line or False """
+    db_path = 'private/iterations.db'
+    my_file = Path(db_path)
+    if my_file.is_file() and stat(my_file).st_size != 0:
+        return subprocess.check_output(['tail', '-1', 'private/iterations.db']).rstrip()
+    else:
+        return False
 
-def day_part(t):
-    "Return timedelta between midnight and `t`."
-    return t - t.replace(hour = 0, minute = 0, second = 0)
+def print_csv(dictList):
+    """ Print to CSV file """
+    with open(PUBLIC_DIR + 'report.csv', mode='w') as report_file:
+        fieldnames = ['title', 'state', 'url', 'created_by', 'created_at', 'assignee',
+                 'assigned_on', 'delta_triage', 'no_triage', 'delta_res',
+                 'late_triage', 'labels', 'comments','sol_fine',
+                 'last_comment', 'last_comment_by',
+                'last_update', 'last_update_by', 'last_update_at', 'closed_at']
+        writer = csv.DictWriter(report_file, fieldnames=fieldnames)
+        writer.writeheader()
+        for d in dictList:
+            writer.writerow(d)
 
-def office_time_between(a, b, start = timedelta(hours = 8, minutes = 30),
-                        stop = timedelta(hours = 17, minutes = 30)):
-    """
-    Return the total office time between `a` and `b` as a timedelta
-    object. Office time consists of weekdays from `start` to `stop`
-    (default: 08:30 to 17:30).
-    """
-    zero = timedelta(0)
-    assert(zero <= start <= stop <= timedelta(1))
-    office_day = stop - start
-    days = (b - a).days + 1
-    weeks = days // 7
-    extra = (max(0, 5 - a.weekday()) + min(5, 1 + b.weekday())) % 5
-    weekdays = weeks * 5 + extra
-    total = office_day * weekdays
-    if a.weekday() < 5:
-        total -= shrink(day_part(a) - start, zero, office_day)
-    if b.weekday() < 5:
-        total -= shrink(stop - day_part(b), zero, office_day)
-    return total
+def tpl_render(dict_list, no_triage, late_triage, sol_fine, since):
+    """ Render and save to tmp """
+    renderer = Renderer()
+    match = re.search(r'\d{4}-\d{2}-\d{2}', since) 
+    since = datetime.strptime(match.group(), '%Y-%m-%d').date()
+    output = renderer.render_path(
+        'template/index.mustache', {
+            'lista' : dict_list,
+            'no-triage' : no_triage,
+            'late-triage' : late_triage,
+            'sol-fine' : sol_fine,
+            'start-date' : since,
+            'end-date' :  time.strftime("%Y-%m-%d")
+        })
+
+    my_path = path.abspath(path.dirname(__file__))
+    with open(path.join(my_path, TMP_DIR + "/index.html"), 'w') as html_file:
+        html_file.write(output)
+        html_file.close()
+
+def move_files():
+    """ Backup old files, move new index to public folder """
+    name = check_db()
+    my_path = path.abspath(path.dirname(__file__))
+    # Backup old
+    if name != False:
+        name = str(name, 'utf-8')
+        final_name = PRIVATE_DIR + name + '.html'
+        original_path = path.join(my_path, PUBLIC_DIR + INDEX_FILE)
+        dest_path = path.join(my_path, final_name)
+        copyfile(original_path, dest_path)
+
+     # Copy new
+    new_index = path.join(my_path, TMP_DIR + INDEX_FILE) 
+    dest_path = path.join(my_path, PUBLIC_DIR + INDEX_FILE) 
+    copyfile(new_index, dest_path)
+
+def export_pdf():
+    """ Function to export the HTML file to PDF """
+    if check_db() != False:
+        name = str(name, 'utf-8')
+        from_file(dest_path, REPORT_DIR + name)
+
+
