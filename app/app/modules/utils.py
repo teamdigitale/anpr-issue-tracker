@@ -13,7 +13,7 @@ from pystache import Renderer
 # Globals
 SECRETS_DIR = 'secrets/'
 TEMPLATE_DIR = '../template/'
-PUBLIC_DIR = '../public/'
+PUBLIC_DIR = '../static/'
 PRIVATE_DIR = '../private/'
 TMP_DIR = '../tmp/'
 REPORT_DIR = '../report/'
@@ -43,6 +43,7 @@ def print_csv(dictList):
             writer.writerow(d)
 
 def tpl_render(dict_list, no_triage, late_triage, sol_fine, since):
+    print("chiamata")
     """ Render and save to tmp """
     renderer = Renderer()
     match = re.search(r'\d{4}-\d{2}-\d{2}', since) 
@@ -58,7 +59,8 @@ def tpl_render(dict_list, no_triage, late_triage, sol_fine, since):
         })
 
     my_path = path.abspath(path.dirname(__file__))
-    with open(path.join(my_path, TMP_DIR + "/index.html"), 'w') as html_file:
+    with open(path.join(my_path, TMP_DIR + "index.html"), 'w') as html_file:
+        print("ho spostato in %s" % path.join(my_path,TMP_DIR + "index.html"))
         html_file.write(output)
         html_file.close()
 

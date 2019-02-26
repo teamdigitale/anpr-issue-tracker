@@ -7,4 +7,5 @@ secrets
 private
 tmp
 public
+app/app/static
 

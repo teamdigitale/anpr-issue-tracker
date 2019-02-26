@@ -1,8 +1,8 @@
 import businesstime
-from datetime import timedelta, timezone, datetime
+from datetime import timedelta, datetime
 from dateutil import parser
-from modules.githubapi import GithubApi
-from modules.utils import *
+from app.modules.utils import *
+from app.modules.githubapi import *
 
 
 def main():
@@ -103,7 +103,7 @@ def main():
                             d['assigned_on'] = parser.parse(e['created_at'], ignoretz=True)
                             delta = bt.businesstimedelta(d['created_at'], d['assigned_on'])
                             if delta.days != 0:
-                                print("### Penale Late TRIAGE: %s€" % (delta.days*50))
+                                print("### Penale Late TRIAGE: %s" % (delta.days*50))
                                 d['late_triage'] = delta.days*50
                                 late_triage+= d['late_triage']
                                 fine_flag = True
@@ -122,7 +122,7 @@ def main():
             delta = bt.businesstimedelta(opened_time, now)
 
             if delta.days >= 2:
-                print("### Penale SOLUZIONE: %s€" % delta.days*50)
+                print("### Penale SOLUZIONE: %s" % (delta.days*50))
                 d['sol_fine'] = delta.days*50
                 sol_fine += d['sol_fine']
                 fine_flag = True

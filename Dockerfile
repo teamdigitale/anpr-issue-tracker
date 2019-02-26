@@ -1,9 +1,6 @@
-FROM tiangolo/uwsgi-nginx:python3.6-alpine3.8
+FROM tiangolo/uwsgi-nginx-flask:python3.6-alpine3.8
 
-WORKDIR /usr/src/app
+COPY ./app /app
 
-COPY . .
-
-RUN pip3 install -r requirements.txt
-
-CMD python3 run.py
+RUN pip3 install -r /app/app/requirements.txt
+CMD ["/usr/bin/supervisord"]
