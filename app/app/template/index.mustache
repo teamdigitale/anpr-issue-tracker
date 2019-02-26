@@ -15,7 +15,12 @@
         <div class="menu-wrapper">
           <ul class="navbar-nav">
             <li class="nav-item dropdown megamenu">
-              <a href="###"><span>TD</span></a>
+              <a class="it-opener d-lg-none" data-toggle="collapse" href="#menu-principale" role="button" aria-expanded="false" aria-controls="menu-principale">
+                  TD
+              </a>
+              <svg class="icon">
+                <use xlink:href="/bootstrap-italia/dist/svg/sprite.svg#it-expand"></use>
+              </svg>
             </li>
           </ul>
         </div>
@@ -41,12 +46,12 @@
                 <div class="col mr-2">
                   <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Triage </div>
                     <div class="h5 mb-0 font-weight-bold text-gray-800">
-                      {{ #no-triage}}
-                      {{ no-triage }} €
-                      {{ /no-triage }}
-                      {{ ^no-triage }}
+                      {{ #multa-triage}}
+                      {{ multa-triage }} €
+                      {{ /multa-triage }}
+                      {{ ^multa-triage }}
                       {{ 0 }}
-                      {{ /no-triage }}
+                      {{ /multa-triage }}
                     </div>
                   </div>
               </div>
@@ -61,12 +66,12 @@
               <div class="col mr-2">
                 <div class="text-xs font-weight-bold text-success text-uppercase mb-1"> Secondo Livello</div>
                 <div class="h5 mb-0 font-weight-bold text-gray-800">
-                  {{ #late-triage}}
-                  {{ late-triage }} €
-                  {{ /late-triage }}
-                  {{ ^late-triage}}
+                  {{ #multa-res}}
+                  {{ multa-res }} €
+                  {{ /multa-res }}
+                  {{ ^multa-res}}
                   {{ 0 }}
-                  {{ /late-triage}}
+                  {{ /multa-res}}
                 </div>
               </div>
             </div>
@@ -84,12 +89,12 @@
                 <div class="row no-gutters align-items-center">
                   <div class="col-auto">
                     <div class="h5 mb-0 mr-3 font-weight-bold text-gray-800">
-                      {{ #sol-fine}}
-                      {{ sol-fine }} €
-                      {{ /sol-fine }}
-                      {{ ^sol-fine}}
+                      {{ #multa-sol}}
+                      {{ multa-sol }} €
+                      {{ /multa-sol }}
+                      {{ ^multa-sol}}
                       {{ 0 }}
-                      {{ /sol-fine}}
+                      {{ /multa-sol}}
                     </div>
                   </div>
                 </div>
