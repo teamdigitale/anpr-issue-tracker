@@ -11,9 +11,7 @@ def hello():
 
 @app.route("/scheduler")
 def run_task():
-    # scheduler.add_job(func=run.main, trigger='cron', day_of_week='0') 
-    a = scheduler.add_job(func=run.main, trigger='cron', minute='*') 
-    print(a)
+    scheduler.add_job(func=run.main, trigger='cron', day_of_week='0') 
     return 'Schedulato. Torna a <a href="/">Home</a>', 200
 
 if __name__ == "__main__":
