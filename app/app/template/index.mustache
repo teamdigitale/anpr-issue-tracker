@@ -15,6 +15,7 @@
         <div class="menu-wrapper">
           <ul class="navbar-nav">
             <li class="nav-item dropdown megamenu">
+              <a href="###"><span>TD</span></a>
             </li>
           </ul>
         </div>
@@ -40,12 +41,12 @@
                 <div class="col mr-2">
                   <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Triage </div>
                     <div class="h5 mb-0 font-weight-bold text-gray-800">
-                      {{ #multa-triage}}
-                      {{ multa-triage }} €
-                      {{ /multa-triage }}
-                      {{ ^multa-triage }}
+                      {{ #no-triage}}
+                      {{ no-triage }} €
+                      {{ /no-triage }}
+                      {{ ^no-triage }}
                       {{ 0 }}
-                      {{ /multa-triage }}
+                      {{ /no-triage }}
                     </div>
                   </div>
               </div>
@@ -60,12 +61,12 @@
               <div class="col mr-2">
                 <div class="text-xs font-weight-bold text-success text-uppercase mb-1"> Secondo Livello</div>
                 <div class="h5 mb-0 font-weight-bold text-gray-800">
-                  {{ #multa-res}}
-                  {{ multa-res }} €
-                  {{ /multa-res }}
-                  {{ ^multa-res}}
+                  {{ #late-triage}}
+                  {{ late-triage }} €
+                  {{ /late-triage }}
+                  {{ ^late-triage}}
                   {{ 0 }}
-                  {{ /multa-res}}
+                  {{ /late-triage}}
                 </div>
               </div>
             </div>
@@ -83,12 +84,12 @@
                 <div class="row no-gutters align-items-center">
                   <div class="col-auto">
                     <div class="h5 mb-0 mr-3 font-weight-bold text-gray-800">
-                      {{ #multa-sol}}
-                      {{ multa-sol }} €
-                      {{ /multa-sol }}
-                      {{ ^multa-sol}}
+                      {{ #sol-fine}}
+                      {{ sol-fine }} €
+                      {{ /sol-fine }}
+                      {{ ^sol-fine}}
                       {{ 0 }}
-                      {{ /multa-sol}}
+                      {{ /sol-fine}}
                     </div>
                   </div>
                 </div>
