@@ -9,4 +9,5 @@ private
 tmp
 public
 app/app/static
+__pycache__/*
 
