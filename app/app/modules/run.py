@@ -4,6 +4,17 @@ from dateutil import parser
 from app.modules.utils import *
 from app.modules.githubapi import *
 
+"""
+1. Triage
+    a. no-triage
+    If the issue has not been assigned yet, and it does not have an
+    'avvisi' flag, then it a fine occurs.
+    b. late-triage
+    If the issue has been assigned late (delta > 1 day), a late triage
+    fine occurs.
+2. Solution
+    If there are not comments and delta > 2 days, a fine occurs
+"""
 
 def main():
     """ Loop on each issue, extract info, print to CSV """
@@ -46,46 +57,31 @@ def main():
     dict_list = []
     bt = businesstime.BusinessTime()
 
+    # Main loop over all issues
     for i in issues:
         fine_flag = False
         d = {}
         # Get events
         print("Processing... %s" % i['title'])
-        d['title'] = i['title']
-        d['state'] = i['state']
         d['url'] = i['html_url']
         d['created_by'] = i['user']['login']
         d['created_at'] = parser.parse(i['created_at'], ignoretz=True)
 
         # TODO: fixme
         events = ghapi.get_url(i['events_url'])
+
         # Labels - If 'avvisi', go to next issue
         if not i['labels']:
-            # events = ghapi.get_url(i['events_url'])
             pass
         else:
-            # TODO: Do we need this?
-            labelsList = []
             for l in i['labels']:
                 if l['name'] == 'avvisi':
                     continue
-                labelsList.append(l['name'])
-            d['labels'] = labelsList
-
-        ### 1. Triage
-        ### a. no-triage
-        ### If the issue has not been assigned yet, and it does not have an
-        ### 'avvisi' flag, then it a fine occurs.
-        ### b. late-triage
-        ### If the issue has been assigned late (delta > 1 day), a late triage
-        ### fine occurs.
 
         # 1.a. - no-triage
         if not i['assignee']:
-            # Calculate delta (businesstimedelta)
             opened_time = parser.parse(i['created_at'], ignoretz=True)
-            now = datetime.now()
-            delta = bt.businesstimedelta(opened_time, now)
+            delta = bt.businesstimedelta(opened_time, datetime.now())
 
             if delta.days != 0:
                 print("### Penale TRIAGE: %s" % (delta.days*50))
@@ -96,7 +92,6 @@ def main():
         else:
             d['assignee'] = i['assignee']['login']
             if i['assignee']['login'] in nomi:
-                # Check assignment time
                 if events:
                     for e in events:
                         if(e['event'] == 'assigned'):
@@ -111,15 +106,10 @@ def main():
         # 2 Solution
         # If there are not comments and delta > 2 days, a fine occurs
         d['comments'] = i['comments']
-        if i['comments'] != 0:
-            comments = ghapi.get_url(i['comments_url'])
-            d['last_comment'] = comments[-1]['updated_at']
-            d['last_comment_by'] = comments[-1]['user']['login']
-        else:
+        if i['comments'] == 0:
             # Calculate delta
             opened_time = parser.parse(i['created_at'], ignoretz=True)
-            now = datetime.now()
-            delta = bt.businesstimedelta(opened_time, now)
+            delta = bt.businesstimedelta(opened_time, datetime.now())
 
             if delta.days >= 2:
                 print("### Penale SOLUZIONE: %s" % (delta.days*50))
@@ -128,6 +118,7 @@ def main():
                 fine_flag = True
 
         # Check update
+        # TODO: Fix me
         if i['state'] == 'open':
             if i['created_at'] != i['updated_at']:
                 if events:

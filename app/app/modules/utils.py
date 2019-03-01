@@ -11,6 +11,7 @@ from shutil import copyfile
 from pystache import Renderer
 
 # Globals
+DEBUG = True
 SECRETS_DIR = 'secrets/'
 TEMPLATE_DIR = '../template/'
 PUBLIC_DIR = '../static/'
@@ -28,19 +29,6 @@ def check_db():
         return subprocess.check_output(['tail', '-1', 'private/iterations.db']).rstrip()
     else:
         return False
-
-def print_csv(dictList):
-    """ Print to CSV file """
-    with open(PUBLIC_DIR + 'report.csv', mode='w') as report_file:
-        fieldnames = ['title', 'state', 'url', 'created_by', 'created_at', 'assignee',
-                 'assigned_on', 'delta_triage', 'no_triage', 'delta_res',
-                 'late_triage', 'labels', 'comments','sol_fine',
-                 'last_comment', 'last_comment_by',
-                'last_update', 'last_update_by', 'last_update_at', 'closed_at']
-        writer = csv.DictWriter(report_file, fieldnames=fieldnames)
-        writer.writeheader()
-        for d in dictList:
-            writer.writerow(d)
 
 def tpl_render(dict_list, no_triage, late_triage, sol_fine, since):
     """ Render and save to tmp """
@@ -85,4 +73,6 @@ def export_pdf():
         name = str(name, 'utf-8')
         from_file(dest_path, REPORT_DIR + name)
 
-
+def log(s):
+    if DEBUG:
+        print(s)
