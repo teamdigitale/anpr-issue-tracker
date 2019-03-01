@@ -21,6 +21,7 @@ from app.modules.githubapi import *
 
 def main(force=False):
     """ Loop on each issue, extract info, call templating function"""
+    print("lanciata")
      # Set variables
     since = '2019-01-01T00:00:00'
     no_triage = 0
@@ -60,9 +61,11 @@ def main(force=False):
 
     # Main loop over all issues
     for i in issues:
+        fine_flag = False
         d = {}
         # Get events
         logging.info("Processing... %s" % i['title'])
+        d['title'] = i['title']
         d['url'] = i['html_url']
         d['created_at'] = parser.parse(i['created_at'], ignoretz=True)
 
@@ -85,6 +88,7 @@ def main(force=False):
                 logging.info("### Penale TRIAGE: %s" % (delta.days*50))
                 d['no_triage'] = delta.days*50
                 no_triage += d['no_triage']
+                fine_flag = True
         # 1.b - late-triage
         else:
             d['assignee'] = i['assignee']['login']
@@ -97,6 +101,7 @@ def main(force=False):
                             d['late_triage'] = calculate_fine(delta.days)
                             logging.info("### Penale Late TRIAGE: %s" % (delta.days*50))
                             late_triage+= d['late_triage']
+                            fine_flag = True
 
         # 2 Solution
         # If there are not comments and delta > 2 days, a fine occurs
@@ -108,8 +113,9 @@ def main(force=False):
                 d['sol_fine'] = calculate_fine(delta.days)
                 logging.info("### Penale SOLUZIONE: %s" % d['sol_fine'])
                 sol_fine += d['sol_fine']
+                fine_flag = True
 
-        if no_triage or late_triage or sol_fine: 
+        if fine_flag: 
             dict_list.append(d)
 
     tpl_render(dict_list, no_triage, late_triage, sol_fine, since)
