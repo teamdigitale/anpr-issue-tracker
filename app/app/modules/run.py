@@ -68,9 +68,6 @@ def main(force=False):
         d['url'] = i['html_url']
         d['created_at'] = parser.parse(i['created_at'], ignoretz=True)
 
-        # TODO: fixme
-        events = ghapi.get_url(i['events_url'])
-
         # Labels - If 'avvisi', go to next issue
         if not i['labels']:
             pass
@@ -91,6 +88,8 @@ def main(force=False):
         # 1.b - late-triage
         else:
             d['assignee'] = i['assignee']['login']
+            # Get events
+            events = ghapi.get_url(i['events_url'])
             if i['assignee']['login'] in nomi and events:
                 for e in events:
                     if(e['event'] == 'assigned'):
