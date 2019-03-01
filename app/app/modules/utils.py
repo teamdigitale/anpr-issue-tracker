@@ -18,7 +18,6 @@ TMP_DIR = '../tmp/'
 REPORT_DIR = '../report/'
 INDEX_FILE = 'index.html'
 
-
 def check_db():
     """ Check DB and return the last line or False """
     db_path = 'private/iterations.db'
@@ -78,3 +77,12 @@ def export_pdf():
 def calculate_fine(days):
     """ Calculate the fines """
     return days * 50
+
+def write_db():
+    """ Save info in db file """
+    my_path = path.abspath(path.dirname(__file__))
+    dest_path = path.join(my_path, PRIVATE_DIR + 'iterations.db')
+    with open(dest_path, mode='w') as db_file:
+        db_file.write(datetime.now().isoformat())
+
+

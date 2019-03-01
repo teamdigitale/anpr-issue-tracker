@@ -1,7 +1,8 @@
 """ This file contains the runner """
-import logging, sys
+import logging
+import sys
+from datetime import datetime
 import businesstime
-from datetime import timedelta, datetime
 from dateutil import parser
 from app.modules.utils import *
 from app.modules.githubapi import *
@@ -10,7 +11,7 @@ from app.modules.githubapi import *
 1. Triage
     a. no-triage
     If the issue has not been assigned yet, and it does not have an
-    'avvisi' flag, then it a fine occurs.
+    'avvisi' flag, then a fine occurs.
     b. late-triage
     If the issue has been assigned late (delta > 1 day), a late triage
     fine occurs.
@@ -18,7 +19,7 @@ from app.modules.githubapi import *
     If there are not comments and delta > 2 days, a fine occurs
 """
 
-def main():
+def main(force=False):
     """ Loop on each issue, extract info, call templating function"""
      # Set variables
     since = '2019-01-01T00:00:00'
@@ -45,12 +46,11 @@ def main():
     db = check_db()
     if db != False:
         diff = datetime.now().date() - parser.parse(db).date()
-        # Leave a 5 days span between 2 interactions
-        if diff.days < 5:
+        # Leave a 5 days span between 2 interactions (if not forcing)
+        if diff.days < 5 and not force:
             logging.info("Week already covered. Closing")
             return
-        else:
-            since = str(db, 'utf-8')
+        since = str(db, 'utf-8')
 
     # Load Api Object and get issues
     ghapi = GithubApi(CLIENT_ID, CLIENT_SECRET)
@@ -114,9 +114,7 @@ def main():
 
     tpl_render(dict_list, no_triage, late_triage, sol_fine, since)
     move_files()
-
-    with open('private/iterations.db', mode='w') as db_file:
-        db_file.write(datetime.now().isoformat())
+    write_db()
 
 # Call main
 if __name__ == "__main__":
