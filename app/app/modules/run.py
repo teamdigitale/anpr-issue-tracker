@@ -21,7 +21,6 @@ from app.modules.githubapi import *
 
 def main(force=False):
     """ Loop on each issue, extract info, call templating function"""
-    print("lanciata")
      # Set variables
     since = '2019-01-01T00:00:00'
     no_triage = 0
