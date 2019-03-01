@@ -1,3 +1,5 @@
+""" This file contains the runner """
+import logging, sys
 import businesstime
 from datetime import timedelta, datetime
 from dateutil import parser
@@ -17,12 +19,18 @@ from app.modules.githubapi import *
 """
 
 def main():
-    """ Loop on each issue, extract info, print to CSV """
+    """ Loop on each issue, extract info, call templating function"""
+     # Set variables
+    since = '2019-01-01T00:00:00'
+    no_triage = 0
+    late_triage = 0
+    sol_fine = 0
+    logging.basicConfig(stream=sys.stderr, level=logging.DEBUG)
 
     # Load cred from file
-    with open(SECRETS_DIR + 'auth.s') as fIn:
+    with open(SECRETS_DIR + 'auth.s') as f_in:
         # todo: check if lines is not null
-        lines = fIn.read().splitlines()
+        lines = f_in.read().splitlines()
         CLIENT_ID = lines[0]
         CLIENT_SECRET = lines[1]
         ORGANIZATION = lines[2]
@@ -30,15 +38,8 @@ def main():
         STATE = lines[4]
 
     # Load names list
-    with open(SECRETS_DIR + 'users.s') as f:
-        nomi = f.read().splitlines()
-
-    # Set variables
-    since = '2019-01-01T00:00:00'
-    no_triage = 0
-    late_triage = 0
-    sol_fine = 0
-    fine_flag = False
+    with open(SECRETS_DIR + 'users.s') as f_in:
+        nomi = f_in.read().splitlines()
 
     # Check DB
     db = check_db()
@@ -46,7 +47,7 @@ def main():
         diff = datetime.now().date() - parser.parse(db).date()
         # Leave a 5 days span between 2 interactions
         if diff.days < 5:
-            print("Week already covered. Closing")
+            logging.info("Week already covered. Closing")
             return
         else:
             since = str(db, 'utf-8')
@@ -59,12 +60,10 @@ def main():
 
     # Main loop over all issues
     for i in issues:
-        fine_flag = False
         d = {}
         # Get events
-        print("Processing... %s" % i['title'])
+        logging.info("Processing... %s" % i['title'])
         d['url'] = i['html_url']
-        d['created_by'] = i['user']['login']
         d['created_at'] = parser.parse(i['created_at'], ignoretz=True)
 
         # TODO: fixme
@@ -80,56 +79,37 @@ def main():
 
         # 1.a. - no-triage
         if not i['assignee']:
-            opened_time = parser.parse(i['created_at'], ignoretz=True)
-            delta = bt.businesstimedelta(opened_time, datetime.now())
+            delta = bt.businesstimedelta(d['created_at'], datetime.now())
 
             if delta.days != 0:
-                print("### Penale TRIAGE: %s" % (delta.days*50))
+                logging.info("### Penale TRIAGE: %s" % (delta.days*50))
                 d['no_triage'] = delta.days*50
                 no_triage += d['no_triage']
-                fine_flag = True
         # 1.b - late-triage
         else:
             d['assignee'] = i['assignee']['login']
-            if i['assignee']['login'] in nomi:
-                if events:
-                    for e in events:
-                        if(e['event'] == 'assigned'):
-                            d['assigned_on'] = parser.parse(e['created_at'], ignoretz=True)
-                            delta = bt.businesstimedelta(d['created_at'], d['assigned_on'])
-                            if delta.days != 0:
-                                print("### Penale Late TRIAGE: %s" % (delta.days*50))
-                                d['late_triage'] = delta.days*50
-                                late_triage+= d['late_triage']
-                                fine_flag = True
+            if i['assignee']['login'] in nomi and events:
+                for e in events:
+                    if(e['event'] == 'assigned'):
+                        d['assigned_on'] = parser.parse(e['created_at'], ignoretz=True)
+                        delta = bt.businesstimedelta(d['created_at'], d['assigned_on'])
+                        if delta.days != 0:
+                            d['late_triage'] = calculate_fine(delta.days)
+                            logging.info("### Penale Late TRIAGE: %s" % (delta.days*50))
+                            late_triage+= d['late_triage']
 
         # 2 Solution
         # If there are not comments and delta > 2 days, a fine occurs
         d['comments'] = i['comments']
         if i['comments'] == 0:
-            # Calculate delta
-            opened_time = parser.parse(i['created_at'], ignoretz=True)
-            delta = bt.businesstimedelta(opened_time, datetime.now())
+            delta = bt.businesstimedelta(d['created_at'], datetime.now())
 
             if delta.days >= 2:
-                print("### Penale SOLUZIONE: %s" % (delta.days*50))
-                d['sol_fine'] = delta.days*50
+                d['sol_fine'] = calculate_fine(delta.days)
+                logging.info("### Penale SOLUZIONE: %s" % d['sol_fine'])
                 sol_fine += d['sol_fine']
-                fine_flag = True
 
-        # Check update
-        # TODO: Fix me
-        if i['state'] == 'open':
-            if i['created_at'] != i['updated_at']:
-                if events:
-                    for e in events:
-                        d['last_update'] = events[-1]['event']
-                        d['last_update_by'] = events[-1]['actor']['login']
-                        d['last_update_at'] = i['updated_at']
-        else:
-            d['closed_at'] = i['closed_at']
-
-        if fine_flag:
+        if no_triage or late_triage or sol_fine: 
             dict_list.append(d)
 
     tpl_render(dict_list, no_triage, late_triage, sol_fine, since)
@@ -137,7 +117,6 @@ def main():
 
     with open('private/iterations.db', mode='w') as db_file:
         db_file.write(datetime.now().isoformat())
-
 
 # Call main
 if __name__ == "__main__":

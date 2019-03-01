@@ -1,17 +1,15 @@
-import csv
+""" This file contains the utils functions """
 import time
 import subprocess
-from pdfkit import from_file
-from pathlib import Path
 import re
-
-from datetime import timedelta, timezone, datetime
 from os import stat, path
 from shutil import copyfile
+from pathlib import Path
+from datetime import datetime
+from pdfkit import from_file
 from pystache import Renderer
 
 # Globals
-DEBUG = True
 SECRETS_DIR = 'secrets/'
 TEMPLATE_DIR = '../template/'
 PUBLIC_DIR = '../static/'
@@ -26,14 +24,15 @@ def check_db():
     db_path = 'private/iterations.db'
     my_file = Path(db_path)
     if my_file.is_file() and stat(my_file).st_size != 0:
-        return subprocess.check_output(['tail', '-1', 'private/iterations.db']).rstrip()
+        ret = subprocess.check_output(['tail', '-1', 'private/iterations.db']).rstrip()
     else:
-        return False
+        ret = False
+    return ret
 
 def tpl_render(dict_list, no_triage, late_triage, sol_fine, since):
     """ Render and save to tmp """
     renderer = Renderer()
-    match = re.search(r'\d{4}-\d{2}-\d{2}', since) 
+    match = re.search(r'\d{4}-\d{2}-\d{2}', since)
     since = datetime.strptime(match.group(), '%Y-%m-%d').date()
     output = renderer.render_path(
         'template/index.mustache', {
@@ -63,16 +62,19 @@ def move_files():
         copyfile(original_path, dest_path)
 
      # Copy new
-    new_index = path.join(my_path, TMP_DIR + INDEX_FILE) 
-    dest_path = path.join(my_path, PUBLIC_DIR + INDEX_FILE) 
+    new_index = path.join(my_path, TMP_DIR + INDEX_FILE)
+    dest_path = path.join(my_path, PUBLIC_DIR + INDEX_FILE)
     copyfile(new_index, dest_path)
 
 def export_pdf():
     """ Function to export the HTML file to PDF """
+    name = check_db()
+    my_path = path.abspath(path.dirname(__file__))
+    dest_path = path.join(my_path, PUBLIC_DIR + INDEX_FILE)
     if check_db() != False:
         name = str(name, 'utf-8')
         from_file(dest_path, REPORT_DIR + name)
 
-def log(s):
-    if DEBUG:
-        print(s)
+def calculate_fine(days):
+    """ Calculate the fines """
+    return days * 50
