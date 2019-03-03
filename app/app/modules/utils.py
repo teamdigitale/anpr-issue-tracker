@@ -84,5 +84,3 @@ def write_db():
     dest_path = path.join(my_path, PRIVATE_DIR + 'iterations.db')
     with open(dest_path, mode='w') as db_file:
         db_file.write(datetime.now().isoformat())
-
-
