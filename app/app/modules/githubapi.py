@@ -1,3 +1,4 @@
+""" Middleware for interacting with GH APIs """
 import requests
 import json
 from github import Github
@@ -13,7 +14,7 @@ class GithubApi(object):
         payload = '?client_id=' + self.client_id
         payload += '&client_secret=' + self.client_secret
         return requests.get(URL +payload).json()
- 
+
     def get_issues(self, organization_name, repository_name, state, since):
         """ Get issues as list """
         issues_list = []
