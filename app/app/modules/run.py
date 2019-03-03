@@ -22,11 +22,11 @@ from app.modules.githubapi import *
 def main(force=False):
     """ Loop on each issue, extract info, call templating function"""
      # Set variables
+    logging.basicConfig(stream=sys.stderr, level=logging.DEBUG)
     since = '2019-01-01T00:00:00'
     no_triage = 0
     late_triage = 0
     sol_fine = 0
-    logging.basicConfig(stream=sys.stderr, level=logging.DEBUG)
 
     # Load cred from file
     with open(SECRETS_DIR + 'auth.s') as f_in:
@@ -55,8 +55,8 @@ def main(force=False):
     # Load Api Object and get issues
     ghapi = GithubApi(CLIENT_ID, CLIENT_SECRET)
     issues = ghapi.get_issues(ORGANIZATION, REPO_NAME, STATE, since)
-    dict_list = []
     bt = businesstime.BusinessTime()
+    dict_list = []
 
     # Main loop over all issues
     for i in issues:
@@ -81,10 +81,10 @@ def main(force=False):
             delta = bt.businesstimedelta(d['created_at'], datetime.now())
 
             if delta.days != 0:
-                logging.info("### Penale TRIAGE: %s" % (delta.days*50))
                 d['no_triage'] = delta.days*50
                 no_triage += d['no_triage']
                 fine_flag = True
+                logging.info("### Penale TRIAGE: %s" % d['no_triage'])
         # 1.b - late-triage
         else:
             d['assignee'] = i['assignee']['login']
@@ -97,9 +97,9 @@ def main(force=False):
                         delta = bt.businesstimedelta(d['created_at'], d['assigned_on'])
                         if delta.days != 0:
                             d['late_triage'] = calculate_fine(delta.days)
-                            logging.info("### Penale Late TRIAGE: %s" % (delta.days*50))
                             late_triage+= d['late_triage']
                             fine_flag = True
+                            logging.info("### Penale Late TRIAGE: %s" % d['late_triage'])
 
         # 2 Solution
         # If there are not comments and delta > 2 days, a fine occurs
