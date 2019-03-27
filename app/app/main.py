@@ -10,7 +10,7 @@ app = Flask(__name__, static_url_path='/app/app/static')
 # Scheduler initialization
 # Calling 'run.main' every 7 days
 sched = BackgroundScheduler(daemon=True, timezone='Europe/Rome')
-# sched.add_job(run.main, 'interval', days=7, next_run_time=datetime.now())
+# Does not start automatically
 sched.add_job(run.main, 'interval', days=7)
 sched.start()
 
@@ -24,7 +24,8 @@ def force_run():
     """ Run job now """
     for job in sched.get_jobs():
         # job.modify(next_run_time=datetime.now(), kwargs={"force":True})
-        job.func()
+        # WARNING: This is a synchronous call
+        job.func(kwargs={"force":True})
     return "Job scheduled to run in a minute. Go back <a href='/'>HOME</a>"
 
 if __name__ == "__main__":
