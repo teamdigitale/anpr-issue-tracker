@@ -5,12 +5,18 @@ some statistics on a webpage.
 
 # Deployment
 At the moment, the app is Dockerized.
-Use this 
+Use the following command:
 
 ``` bash
  docker build -t ghtracker .
  docker run -p 8001:80 -v $(pwd)/private/:/app/app/private:rw -e TZ=Europe/Rome
  ghtracker
+```
+
+If not, you can run it manually by browsing the `app/app` folder and running:
+
+``` bash
+FLASK_APP=main.py python3 -m flask run
 ```
 
 # Known issues
