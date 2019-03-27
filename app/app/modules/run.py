@@ -29,7 +29,10 @@ def main(force=False):
     sol_fine = 0
 
     # Load cred from file
-    with open(SECRETS_DIR + 'auth.s') as f_in:
+
+    my_path = path.abspath(path.dirname(__file__))
+
+    with open(path.join(my_path, PRIVATE_DIR + "auth.s"), 'r') as f_in:
         # todo: check if lines is not null
         lines = f_in.read().splitlines()
         CLIENT_ID = lines[0]
@@ -39,7 +42,7 @@ def main(force=False):
         STATE = lines[4]
 
     # Load names list
-    with open(SECRETS_DIR + 'users.s') as f_in:
+    with open(path.join(my_path, PRIVATE_DIR + "users.s"), 'r') as f_in:
         nomi = f_in.read().splitlines()
 
     # Check DB

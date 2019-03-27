@@ -5,11 +5,12 @@ from datetime import datetime
 from .modules import run
 
 # app initialization
-app = Flask(__name__, static_url_path='/static')
+app = Flask(__name__, static_url_path='/app/app/static')
 
 # Scheduler initialization
 # Calling 'run.main' every 7 days
-sched = BackgroundScheduler(daemon=True)
+sched = BackgroundScheduler(daemon=True, timezone='Europe/Rome')
+# sched.add_job(run.main, 'interval', days=7, next_run_time=datetime.now())
 sched.add_job(run.main, 'interval', days=7)
 sched.start()
 
@@ -22,7 +23,8 @@ def hello():
 def force_run():
     """ Run job now """
     for job in sched.get_jobs():
-        job.modify(next_run_time=datetime.now(), kwargs={"force":True})
+        # job.modify(next_run_time=datetime.now(), kwargs={"force":True})
+        job.func()
     return "Job scheduled to run in a minute. Go back <a href='/'>HOME</a>"
 
 if __name__ == "__main__":

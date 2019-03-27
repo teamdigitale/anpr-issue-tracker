@@ -10,13 +10,12 @@ from pdfkit import from_file
 from pystache import Renderer
 
 # Globals
-SECRETS_DIR = 'secrets/'
 TEMPLATE_DIR = '../template/'
 PUBLIC_DIR = '../static/'
 PRIVATE_DIR = '../private/'
-TMP_DIR = '../tmp/'
-REPORT_DIR = '../report/'
+TMP_DIR = '/tmp/'
 INDEX_FILE = 'index.html'
+REPORT_DIR = '../report/'
 
 def check_db():
     """ Check DB and return the last line or False """
@@ -33,8 +32,10 @@ def tpl_render(dict_list, no_triage, late_triage, sol_fine, since):
     renderer = Renderer()
     match = re.search(r'\d{4}-\d{2}-\d{2}', since)
     since = datetime.strptime(match.group(), '%Y-%m-%d').date()
+    my_path = path.abspath(path.dirname(__file__))
+    
     output = renderer.render_path(
-        'template/index.mustache', {
+        path.join(my_path, TEMPLATE_DIR + "index.mustache"), {
             'lista' : dict_list,
             'no-triage' : no_triage,
             'late-triage' : late_triage,
@@ -43,13 +44,12 @@ def tpl_render(dict_list, no_triage, late_triage, sol_fine, since):
             'end-date' :  time.strftime("%Y-%m-%d")
         })
 
-    my_path = path.abspath(path.dirname(__file__))
     with open(path.join(my_path, TMP_DIR + "index.html"), 'w') as html_file:
         html_file.write(output)
         html_file.close()
 
 def move_files():
-    """ Backup old files, move new index to public folder """
+    """ Backup old files, move new index to static folder """
     name = check_db()
     my_path = path.abspath(path.dirname(__file__))
     # Backup old

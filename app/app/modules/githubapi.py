@@ -1,7 +1,6 @@
 """ Middleware for interacting with GH APIs """
 import requests
 import json
-from github import Github
 
 class GithubApi(object):
     """ Class for handling the GitHub API """

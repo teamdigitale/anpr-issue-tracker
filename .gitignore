@@ -7,7 +7,6 @@
 secrets
 private
 tmp
-public
-app/app/static
+static
 __pycache__/*
 
