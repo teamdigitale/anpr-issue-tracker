@@ -6,7 +6,6 @@ from os import stat, path
 from shutil import copyfile
 from pathlib import Path
 from datetime import datetime
-from pdfkit import from_file
 from pystache import Renderer
 
 # Globals
