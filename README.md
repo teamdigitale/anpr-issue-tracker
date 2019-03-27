@@ -8,8 +8,9 @@ At the moment, the app is Dockerized.
 Use this 
 
 ``` bash
+ docker build -t ghtracker .
  docker run -p 8001:80 -v $(pwd)/private/:/app/app/private:rw -e TZ=Europe/Rome
- ghanpr
+ ghtracker
 ```
 
 # Known issues
