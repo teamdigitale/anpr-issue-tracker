@@ -25,7 +25,7 @@ def force_run():
     for job in sched.get_jobs():
         # job.modify(next_run_time=datetime.now(), kwargs={"force":True})
         # WARNING: This is a synchronous call
-        job.func(kwargs={"force":True})
+        job.func(force=True)
     return "Job scheduled to run in a minute. Go back <a href='/'>HOME</a>"
 
 if __name__ == "__main__":
