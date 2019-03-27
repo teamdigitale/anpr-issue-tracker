@@ -22,7 +22,7 @@ from app.modules.githubapi import *
 def main(force=False):
     """ Loop on each issue, extract info, call templating function"""
      # Set variables
-    logging.basicConfig(stream=sys.stderr, level=logging.DEBUG)
+    logging.basicConfig(stream=sys.stderr, level=logging.INFO)
     since = '2019-01-01T00:00:00'
     no_triage = 0
     late_triage = 0
@@ -119,6 +119,7 @@ def main(force=False):
         if fine_flag: 
             dict_list.append(d)
 
+    # Call Renderer and process files
     tpl_render(dict_list, no_triage, late_triage, sol_fine, since)
     move_files()
     write_db()
