@@ -16,12 +16,13 @@ TMP_DIR = '/tmp/'
 INDEX_FILE = 'index.html'
 REPORT_DIR = '../report/'
 
-def check_label(labels):
+def check_label(labels,reserved_labels):
     if not labels:
         return False
-    for l in labels:
-        if l['name'] == 'avvisi':
-            return True
+    for reserved_label in reserved_labels:
+        for l in labels:
+            if l['name'] == reserved_label:
+                return True
     return False
 
 def check_db():

@@ -45,6 +45,10 @@ def main(force=False):
     with open(path.join(my_path, PRIVATE_DIR + "users.s"), 'r') as f_in:
         nomi = f_in.read().splitlines()
 
+    # Load labels list
+    with open(path.join(my_path, PRIVATE_DIR + "labels.s"), 'r') as f_in:
+        reserved_labels = f_in.read().splitlines()
+
     # Check DB
     db = check_db()
     if db != False:
@@ -72,7 +76,7 @@ def main(force=False):
         d['created_at'] = parser.parse(i['created_at'], ignoretz=True)
 
         # Labels - If 'avvisi', go to next issue
-        if check_label(i['labels']):
+        if check_label(i['labels'], reserved_labels):
             continue
         else:
             pass
