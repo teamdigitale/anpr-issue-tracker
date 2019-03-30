@@ -72,12 +72,10 @@ def main(force=False):
         d['created_at'] = parser.parse(i['created_at'], ignoretz=True)
 
         # Labels - If 'avvisi', go to next issue
-        if not i['labels']:
-            pass
+        if check_label(i['labels']):
+            continue
         else:
-            for l in i['labels']:
-                if l['name'] == 'avvisi':
-                    continue
+            pass
 
         # 1.a. - no-triage
         if not i['assignee']:

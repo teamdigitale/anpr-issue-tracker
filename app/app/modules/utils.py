@@ -16,6 +16,14 @@ TMP_DIR = '/tmp/'
 INDEX_FILE = 'index.html'
 REPORT_DIR = '../report/'
 
+def check_label(labels):
+    if not labels:
+        return False
+    for l in labels:
+        if l['name'] == 'avvisi':
+            return True
+    return False
+
 def check_db():
     """ Check DB and return the last line or False """
     db_path = 'private/iterations.db'
