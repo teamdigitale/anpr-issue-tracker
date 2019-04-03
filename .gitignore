@@ -1,12 +1,10 @@
-*.s
 .venv
 *.csv
 *.swp
 *.swo
 *.pyc
-secrets
+*.yaml
 private
-tmp
 static
 __pycache__/*
 

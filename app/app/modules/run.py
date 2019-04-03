@@ -1,6 +1,7 @@
 """ This file contains the runner """
 import logging
 import sys
+import yaml
 from datetime import datetime
 import businesstime
 from dateutil import parser
@@ -32,22 +33,15 @@ def main(force=False):
 
     my_path = path.abspath(path.dirname(__file__))
 
-    with open(path.join(my_path, PRIVATE_DIR + "auth.s"), 'r') as f_in:
-        # todo: check if lines is not null
-        lines = f_in.read().splitlines()
-        CLIENT_ID = lines[0]
-        CLIENT_SECRET = lines[1]
-        ORGANIZATION = lines[2]
-        REPO_NAME = lines[3]
-        STATE = lines[4]
-
-    # Load names list
-    with open(path.join(my_path, PRIVATE_DIR + "users.s"), 'r') as f_in:
-        nomi = f_in.read().splitlines()
-
-    # Load labels list
-    with open(path.join(my_path, PRIVATE_DIR + "labels.s"), 'r') as f_in:
-        reserved_labels = f_in.read().splitlines()
+    with open(path.join(my_path, PRIVATE_DIR + "conf.yaml"), 'r') as f_in:
+        yamlContent = yaml.load(f_in, Loader=yaml.FullLoader)
+        CLIENT_ID = yamlContent['CLIENT_ID']
+        CLIENT_SECRET = yamlContent['CLIENT_SECRET']
+        ORGANIZATION = yamlContent['ORGANIZATION']
+        REPO_NAME = yamlContent['REPO_NAME']
+        STATE = yamlContent['STATE']
+        NAMES = yamlContent['NAMES']
+        RESERVED_LABELS = yamlContent['RESERVED_LABELS']
 
     # Check DB
     db = check_db()
@@ -76,10 +70,8 @@ def main(force=False):
         d['created_at'] = parser.parse(i['created_at'], ignoretz=True)
 
         # Labels - If 'avvisi', go to next issue
-        if check_label(i['labels'], reserved_labels):
+        if check_label(i['labels'], RESERVED_LABELS):
             continue
-        else:
-            pass
 
         # 1.a. - no-triage
         if not i['assignee']:
@@ -95,7 +87,7 @@ def main(force=False):
             d['assignee'] = i['assignee']['login']
             # Get events
             events = ghapi.get_url(i['events_url'])
-            if i['assignee']['login'] in nomi and events:
+            if i['assignee']['login'] in NAMES and events:
                 for e in events:
                     if(e['event'] == 'assigned'):
                         d['assigned_on'] = parser.parse(e['created_at'], ignoretz=True)
