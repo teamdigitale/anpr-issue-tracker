@@ -30,9 +30,7 @@ def main(force=False):
     sol_fine = 0
 
     # Load cred from file
-
     my_path = path.abspath(path.dirname(__file__))
-
     with open(path.join(my_path, PRIVATE_DIR + "conf.yaml"), 'r') as f_in:
         yamlContent = yaml.load(f_in, Loader=yaml.FullLoader)
         CLIENT_ID = yamlContent['CLIENT_ID']
