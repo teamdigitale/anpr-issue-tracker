@@ -8,11 +8,13 @@ ENV HOST 0.0.0.0
 ENV PORT 5001
 ENV DEBUG true
 
-COPY . /api
 WORKDIR /api
+COPY requirements.txt /api/requirements.txt
 
 # install requirements
 RUN pip install -r requirements.txt
+
+COPY . /api
 
 # expose the app port
 EXPOSE 5001
