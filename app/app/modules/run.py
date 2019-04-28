@@ -20,7 +20,7 @@ from app.modules.githubapi import *
     If there are not comments and delta > 2 days, a fine occurs
 """
 
-def main(force=False):
+def main(force=False) -> bool:
     """ Loop on each issue, extract info, call templating function"""
      # Set variables
     logging.basicConfig(stream=sys.stderr, level=logging.INFO)
@@ -48,7 +48,7 @@ def main(force=False):
         # Leave a 5 days span between 2 interactions (if not forcing)
         if diff.days < 5 and not force:
             logging.info("Week already covered. Closing")
-            return
+            return False
         since = str(db, 'utf-8')
 
     # Load Api Object and get issues
@@ -115,6 +115,8 @@ def main(force=False):
     tpl_render(dict_list, no_triage, late_triage, sol_fine, since)
     move_files()
     write_db()
+
+    return True
 
 # Call main
 if __name__ == "__main__":
