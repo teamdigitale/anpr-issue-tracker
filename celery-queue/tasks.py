@@ -32,7 +32,7 @@ celery = Celery('tasks', broker=CELERY_BROKER_URL, backend=CELERY_RESULT_BACKEND
 @celery.task(name='tasks.run')
 def run(force=False) -> bool:
     """ Loop on each issue, extract info, call templating function"""
-     # Set variables
+    # Set variables
     logging.basicConfig(stream=sys.stderr, level=logging.INFO)
     since = '2019-01-01T00:00:00'
     no_triage = 0
