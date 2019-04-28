@@ -1,8 +1,5 @@
 """ This is the main flask routing module """
 from flask import Flask, request
-from apscheduler.schedulers.background import BackgroundScheduler
-from datetime import datetime
-from .modules import run
 from flask_basicauth import BasicAuth
 from os import path
 import yaml
@@ -17,31 +14,34 @@ with open(path.join(my_path, "private/conf.yaml"), 'r') as f_in:
         app.config['BASIC_AUTH_USERNAME'] = yamlContent['BASIC_AUTH_USERNAME']
         app.config['BASIC_AUTH_PASSWORD'] = yamlContent['BASIC_AUTH_PASSWORD']
 
+# Basic Auth config
 app.config['BASIC_AUTH_FORCE'] = True
-
 basic_auth = BasicAuth(app)
 
-# Scheduler initialization
-# Calling 'run.main' every 7 days
-sched = BackgroundScheduler(daemon=True, timezone='Europe/Rome')
-# Does not start automatically
-sched.add_job(run.main, 'interval', days=7)
-sched.start()
+# TODO: add scheduling
 
+# App Routing.
 @app.route("/")
 @basic_auth.required
-def hello():
+def index():
     """ Serve static page """
     return app.send_static_file('index.html')
 
-@app.route("/run")
-def force_run():
-    """ Run job now """
-    for job in sched.get_jobs():
-        # job.modify(next_run_time=datetime.now(), kwargs={"force":True})
-        # WARNING: This is a synchronous call
-        job.func(force=True)
-    return "Job scheduled to run in a minute. Go back <a href='/'>HOME</a>"
+# Force run outside schedule.
+@app.route('/run')
+def force_run() -> str:
+    force = True
+    task = celery.send_task('tasks.run', args=[force], kwargs={})
+    response = f"<a href='{url_for('check_task', task_id=task.id, external=True)}'>Check the current status of {task.id} </a>"
+    return response
 
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", debug=True, port=80)
+
+# Check the status of the run.
+# QUESTION: should we insert flower?
+@app.route('/check/<string:task_id>')
+def check_task(task_id: str) -> str:
+    res = celery.AsyncResult(task_id)
+    if res.state == states.PENDING:
+        return res.state
+    else:
+        return str(res.result)
