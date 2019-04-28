@@ -18,9 +18,18 @@ services:
     build:
       context: celery-queue
       dockerfile: Dockerfile
+    command: celery -A tasks worker --loglevel=info
     volumes:
       - ./private:/queue/private:rw
       - ./static:/queue/static:rw
+    depends_on:
+      - redis
+  # Celery Beat 
+  beat:
+    build:
+      context: celery-queue
+      dockerfile: Dockerfile
+    command: celery -A tasks beat --loglevel=info
     depends_on:
       - redis
   # Flower Monitor

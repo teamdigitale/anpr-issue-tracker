@@ -10,4 +10,4 @@ RUN pip install -r requirements.txt
 
 COPY . /queue
 
-ENTRYPOINT celery -A tasks worker --beat --loglevel=info
+#ENTRYPOINT celery -A tasks worker --beat --loglevel=info
