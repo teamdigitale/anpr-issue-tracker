@@ -4,12 +4,10 @@ ENV CELERY_BROKER_URL redis://redis:6379/0
 ENV CELERY_RESULT_BACKEND redis://redis:6379/0
 ENV C_FORCE_ROOT true
 
-COPY . /queue
 WORKDIR /queue
-
+COPY requirements.txt /queue/requirements.txt
 RUN pip install -r requirements.txt
 
-RUN mkdir /queue/modules/static
-RUN echo "<html><p>prova</p></html>" > /queue/modules/static/index.html
+COPY . /queue
 
-ENTRYPOINT celery -A tasks worker --loglevel=info
+ENTRYPOINT celery -A tasks worker --beat --loglevel=info
