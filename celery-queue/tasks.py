@@ -10,6 +10,7 @@ from modules.githubapi import *
 import os
 import time
 from celery import Celery
+from celery.schedules import crontab   
 
 CELERY_BROKER_URL = os.environ.get('CELERY_BROKER_URL', 'redis://localhost:6379'),
 CELERY_RESULT_BACKEND = os.environ.get('CELERY_RESULT_BACKEND', 'redis://localhost:6379')
@@ -28,6 +29,16 @@ celery = Celery('tasks', broker=CELERY_BROKER_URL, backend=CELERY_RESULT_BACKEND
 2. Solution
     If there are not comments and delta > 2 days, a fine occurs
 """
+@celery.on_after_configure.connect
+def setup_periodic_tasks(sender, **kwargs):
+    # Calls test('hello') every 10 seconds.
+    sender.add_periodic_task(10.0, run , name='add every 10')
+
+    # Executes every Monday morning at 7:30 a.m.
+    sender.add_periodic_task(
+        crontab(hour=0, minute=0, day_of_week=1),
+        run
+    )
 
 @celery.task(name='tasks.run')
 def run(force=False) -> bool:
