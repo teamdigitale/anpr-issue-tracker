@@ -1,4 +1,16 @@
-""" This file contains the runner """
+""" This file contains the runner
+1. Triage
+    a. no-triage
+    If the issue has not been assigned yet, and it does not have an
+    'avvisi' flag, then a fine occurs.
+    b. late-triage
+    If the issue has been assigned late (delta > 1 day), a late triage
+    fine occurs.
+2. Solution
+    If there are not comments and delta > 2 days, a fine occurs
+"""
+
+# Imports.
 import logging
 import sys
 import yaml
@@ -12,31 +24,17 @@ import time
 from celery import Celery
 from celery.schedules import crontab   
 
+# Celery config.
 CELERY_BROKER_URL = os.environ.get('CELERY_BROKER_URL', 'redis://localhost:6379'),
 CELERY_RESULT_BACKEND = os.environ.get('CELERY_RESULT_BACKEND', 'redis://localhost:6379')
-
 celery = Celery('tasks', broker=CELERY_BROKER_URL, backend=CELERY_RESULT_BACKEND)
 
-
-"""
-1. Triage
-    a. no-triage
-    If the issue has not been assigned yet, and it does not have an
-    'avvisi' flag, then a fine occurs.
-    b. late-triage
-    If the issue has been assigned late (delta > 1 day), a late triage
-    fine occurs.
-2. Solution
-    If there are not comments and delta > 2 days, a fine occurs
-"""
+# Functions.
 @celery.on_after_configure.connect
 def setup_periodic_tasks(sender, **kwargs):
-    # Calls test('hello') every 10 seconds.
-    sender.add_periodic_task(10.0, run , name='add every 10')
-
-    # Executes every Monday morning at 7:30 a.m.
+    """ Schedule the run task to be run every midnight """
     sender.add_periodic_task(
-        crontab(hour=0, minute=0, day_of_week=1),
+        crontab(hour=0, minute=0),
         run
     )
 
