@@ -24,6 +24,9 @@ This will build the images and run the containers in `interactive` mode.
 If you want you could just build the images with `docker-compose build` and
 then run them later on with `docker-compose up`. 
 
+To run the crawler forcing the checks it is necessary to browse the `/run`
+page and a job will be scheduled to be run ASAP.
+
 # Author
 Check the `AUTHORS.md` file in the repo root.
 
