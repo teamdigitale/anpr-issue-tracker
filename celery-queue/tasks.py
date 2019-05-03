@@ -1,14 +1,4 @@
-""" This file contains the runner """
-import logging
-import sys
-import yaml
-from datetime import datetime
-import businesstime
-from dateutil import parser
-from app.modules.utils import *
-from app.modules.githubapi import *
-
-"""
+""" This file contains the runner
 1. Triage
     a. no-triage
     If the issue has not been assigned yet, and it does not have an
@@ -20,9 +10,38 @@ from app.modules.githubapi import *
     If there are not comments and delta > 2 days, a fine occurs
 """
 
-def main(force=False):
+# Imports.
+import logging
+import sys
+import yaml
+from datetime import datetime
+import businesstime
+from dateutil import parser
+from modules.utils import *
+from modules.githubapi import *
+import os
+import time
+from celery import Celery
+from celery.schedules import crontab   
+
+# Celery config.
+CELERY_BROKER_URL = os.environ.get('CELERY_BROKER_URL', 'redis://localhost:6379'),
+CELERY_RESULT_BACKEND = os.environ.get('CELERY_RESULT_BACKEND', 'redis://localhost:6379')
+celery = Celery('tasks', broker=CELERY_BROKER_URL, backend=CELERY_RESULT_BACKEND)
+
+# Functions.
+@celery.on_after_configure.connect
+def setup_periodic_tasks(sender, **kwargs):
+    """ Schedule the run task to be run every midnight """
+    sender.add_periodic_task(
+        crontab(hour=0, minute=0),
+        run
+    )
+
+@celery.task(name='tasks.run')
+def run(force=False) -> bool:
     """ Loop on each issue, extract info, call templating function"""
-     # Set variables
+    # Set variables
     logging.basicConfig(stream=sys.stderr, level=logging.INFO)
     since = '2019-01-01T00:00:00'
     no_triage = 0
@@ -48,7 +67,7 @@ def main(force=False):
         # Leave a 5 days span between 2 interactions (if not forcing)
         if diff.days < 5 and not force:
             logging.info("Week already covered. Closing")
-            return
+            return False
         since = str(db, 'utf-8')
 
     # Load Api Object and get issues
@@ -116,6 +135,4 @@ def main(force=False):
     move_files()
     write_db()
 
-# Call main
-if __name__ == "__main__":
-    main()
+    return True

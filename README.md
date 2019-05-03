@@ -3,36 +3,32 @@
 This web app aims at tracking the issues on a certain repository and display
 some statistics on a webpage.
 
+# Structure 
+The app is composed by a set of Docker containers organized as follows:
+
+* Flask web app
+* Redis 
+* Celery Worker
+* Celery Beat
+* Celery Flower (optional)
+
 # Deployment
-At the moment, the app is Dockerized.
-Use the following command:
+At the moment, the orchestration is done using `docker-compose`.
+As such, in order to have a working installation up and running you should:
 
 ``` bash
- docker build -t ghtracker .
- docker run -p 8001:80 -v $(pwd)/private/:/app/app/private:rw -e TZ=Europe/Rome
- ghtracker
+docker-compose up --build
 ```
 
-If not, you can run it manually by browsing the `app/app` folder and running:
+This will build the images and run the containers in `interactive` mode. 
+If you want you could just build the images with `docker-compose build` and
+then run them later on with `docker-compose up`. 
 
-``` bash
-FLASK_APP=main.py python3 -m flask run
-```
+To run the crawler forcing the checks it is necessary to browse the `/run`
+page and a job will be scheduled to be run ASAP.
 
-# Known issues
-* For some reasons (still unknown), if the `apscheduler` is immediately started
-  inside the dockerized instance with this command:
-
-  ```python
-  sched.add_job(run.main, 'interval', days=7, next_run_time=datetime.now())
-  ```
-  the job is started in a synchronous way and nginx does not accept any
-  requests. Same thing happens when using `job.func()` inside the `force_run()`
-  function. 
-  Probably this is due to the thread handling system, since running the flask
-  app locally works as expected.
-  NOTE: it may also be related to a timezone issue.
- 
+# Author
+Check the `AUTHORS.md` file in the repo root.
 
 # License
 GNU Affero GPL v3.0 or later

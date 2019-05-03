@@ -9,12 +9,12 @@ from datetime import datetime
 from pystache import Renderer
 
 # Globals
-TEMPLATE_DIR = '../template/'
-PUBLIC_DIR = '../static/'
-PRIVATE_DIR = '../private/'
+TEMPLATE_DIR = 'template/'
+PUBLIC_DIR = '/queue/static/'
+PRIVATE_DIR = '/queue/private/'
 TMP_DIR = '/tmp/'
 INDEX_FILE = 'index.html'
-REPORT_DIR = '../report/'
+REPORT_DIR = 'report/'
 
 def check_label(labels, reserved_labels):
     """ Check if label is in list of reserved labels """

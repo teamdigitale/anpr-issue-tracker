@@ -1,0 +1,48 @@
+version: "3"
+services:
+  # Flask App 
+  web:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    volumes:
+      - ./private:/api/private:rw
+      - ./static:/api/static:rw
+    restart: always
+    ports:
+      - "80:5001"
+    depends_on:
+      - redis
+  # Celery Worker
+  worker:
+    build:
+      context: celery-queue
+      dockerfile: Dockerfile
+    command: celery -A tasks worker --loglevel=info
+    volumes:
+      - ./private:/queue/private:rw
+      - ./static:/queue/static:rw
+    depends_on:
+      - redis
+  # Celery Beat 
+  beat:
+    build:
+      context: celery-queue
+      dockerfile: Dockerfile
+    command: celery -A tasks beat --loglevel=info
+    depends_on:
+      - redis
+  # Flower Monitor
+  monitor:
+    build:
+      context: celery-queue
+      dockerfile: Dockerfile
+    ports:
+      - "5555:5555"
+    entrypoint: flower
+    command:  -A tasks --port=5555 --broker=redis://redis:6379/0
+    depends_on:
+      - redis
+  # Redis Queue
+  redis:
+    image: redis
