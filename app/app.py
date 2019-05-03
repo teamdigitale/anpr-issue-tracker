@@ -7,10 +7,10 @@ import celery.states as states
 import yaml
 
 # app initialization
-app = Flask(__name__, static_url_path='/api/static')
+app = Flask(__name__, static_url_path='/app/static')
 
 # Read info for Basic Auth user:pwd
-with open("/api/private/conf.yaml", 'r') as f_in:
+with open("/app/private/conf.yaml", 'r') as f_in:
         yamlContent = yaml.load(f_in, Loader=yaml.FullLoader)
         app.config['BASIC_AUTH_USERNAME'] = yamlContent['BASIC_AUTH_USERNAME']
         app.config['BASIC_AUTH_PASSWORD'] = yamlContent['BASIC_AUTH_PASSWORD']

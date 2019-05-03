@@ -1,13 +1,13 @@
 version: "3"
 services:
   # Flask App 
-  web:
+  app:
     build:
-      context: ./api
+      context: ./app
       dockerfile: Dockerfile
     volumes:
-      - ./private:/api/private:rw
-      - ./static:/api/static:rw
+      - ./private:/app/private:rw
+      - ./static:/app/static:rw
     restart: always
     ports:
       - "80:5001"
